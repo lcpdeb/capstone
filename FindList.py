@@ -29,5 +29,4 @@ if __name__ == '__main__':
                 [7,6,6],
                 [7,6,6],
                 [5,6,6]])
-    # print(isSamePosition(OPEN_LIST[0,:],M[0,0:2]))
     print("Unit Test - FindList: ", FindList(M,OPEN_LIST,CLOSE_LIST))
