@@ -36,28 +36,22 @@ print("Self Test - GetBoundary:\n", obstacle)
 start_point=mat([[1,1]])
 end_point=mat([[4,4]])
 num=5
-obstacle=GetObstacle(num,obstacle,start_point,end_point,5)
-print("Self Test - GetObstacle:\n", obstacle)
-e=mat([[4,2]])
-print("Self Test - isObstacle:", isObstacle(e,obstacle))
-start_point=mat([[1,1]])
-end_point=mat([[4,4]])
-print("Self Test - Astar:\n", Astar(obstacle,start_point,end_point))
-# -*- coding: utf-8 -*-
-import time
-import matplotlib.pyplot as plt
+# obstacle=GetObstacle(num,obstacle,start_point,end_point,5)
+# print("Self Test - GetObstacle:\n", obstacle)
+# e=mat([[4,2]])
+# print("Self Test - isObstacle:", isObstacle(e,obstacle))
+# start_point=mat([[1,1]])
+# end_point=mat([[4,4]])
+# print("Self Test - Astar:\n", Astar(obstacle,start_point,end_point))
 
-def showResult(xList, yList, title, xLabel, yLabel):
-    plt.plot(xList, yList, 'g*-')
-    plt.title(title)
-    plt.xlabel(xLabel)
-    plt.ylabel(yLabel)
-    for x, y in zip(xList, yList):
-        plt.text(x, y+0.3, str(y), ha='center', va='bottom', fontsize=10.5)
-        # plt.savefig('fig'+str(int(time.time()))+'.jpg')
-        plt.draw()
-        plt.pause(0.5)
+def random_pick(some_list, probabilities): 
+    x = random.uniform(0,1)
+    print(x)
+    cumulative_probability = 0.0 
+    for item, item_probability in zip(some_list, probabilities): 
+         cumulative_probability += item_probability
+         print(cumulative_probability)
+         if x < cumulative_probability:
+               break 
+    return item 
 
-x_arr = [1, 2, 3, 4, 5, 6]
-y_arr = [1, 4, 9, 16, 25, 36]
-showResult(x_arr, y_arr, 'title', 'x', 'y')

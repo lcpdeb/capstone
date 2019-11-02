@@ -3,34 +3,85 @@
 from numpy import *
 from isSamePosition import isSamePosition
 from GetBoundary import GetBoundary
+from Ultrasonic import Ultrasonic
+
 
 # WILL BE USED BY ULTRASONIC
 
-def GetObstacle(num_of_obstacle,obstacle,start,goal,map_size):
-    # generate Obstacles
-    ob_cordinate=mat(random.randint(1,map_size+1,size=[map_size*map_size,2]))
-    # print("obstacles are :\n", ob_cordinate)
-    # pick #num_of_obstacle of obstacles generated
-    ob=ob_cordinate[0:num_of_obstacle,:]
-    # print("obstacles are :\n", ob)
-    # remove Starting Point and Goal
-    removed_list=[]
-    for index in range(0,len(ob[:,0])):
-        if isSamePosition(ob[index,:],start) or isSamePosition(ob[index,:],goal):
-            # Add Start/Goal to Remove List
-            removed_list.append(index)
-    # Remove the element in Remove List in row
-    ob=delete(ob,removed_list,axis=0)
-    # Add Obstacle to the list
-    obstacle=vstack((ob,obstacle))
-    return obstacle
+def random_pick(some_list, probabilities): 
+    x = random.uniform(0,1)
+    cumulative_probability = 0.0 
+    for item, item_probability in zip(some_list, probabilities): 
+         cumulative_probability += item_probability
+         if x < cumulative_probability:
+               break 
+    return item 
+
+def GetObstacle(path_map,mode):
+    left_detect_flag=0
+    right_detect_flag=0
+    up_detect_flag=0
+    down_detect_flag=0
+    if mode=='random':
+        # generate Obstacles
+        new_obstacle_cordinate=mat(random.randint(1,path_map.map_size+1,size=[path_map.map_size*path_map.map_size,2]))
+        # print("obstacles are :\n", ob_cordinate)
+        # pick #num_of_obstacle of obstacles generated
+        new_obstacle=new_obstacle_cordinate[0:path_map.num_of_obstacle,:]
+        # print("obstacles are :\n", ob)
+        # remove Starting Point and Goal
+        removed_list=[]
+        for index in range(0,len(new_obstacle[:,0])):
+            if isSamePosition(new_obstacle[index,:],path_map.start_position) or isSamePosition(new_obstacle[index,:],path_map.end_position):
+                # Add Start/Goal to Remove List
+                removed_list.append(index)
+        # Remove the element in Remove List in row
+        new_obstacle=delete(new_obstacle,removed_list,axis=0)
+    elif mode=='detect':
+        new_obstacle=mat([[0,0]])
+        print("Ultrasonic is detecting...")
+        # ultrasonic not created yet
+        left_detect_flag,right_detect_flag,up_detect_flag,down_detect_flag=Ultrasonic(path_map)
+        # print(left_detect_flag,right_detect_flag,up_detect_flag,down_detect_flag)
+        
+        # left_detect_flag=random_pick([0,1],[0.6,0.4])
+        # right_detect_flag=random_pick([0,1],[0.65,0.35])
+        # up_detect_flag=random_pick([0,1],[0.65,0.35])
+        # down_detect_flag=random_pick([0,1],[0.6,0.4])
+
+        if left_detect_flag:
+            temp_obstacle=mat([[path_map.current_position[0,0]-1,path_map.current_position[0,1]]])
+            new_obstacle=vstack((new_obstacle,temp_obstacle))
+        if right_detect_flag:
+            temp_obstacle=mat([[path_map.current_position[0,0]+1,path_map.current_position[0,1]]])
+            new_obstacle=vstack((new_obstacle,temp_obstacle))
+        if up_detect_flag:
+            temp_obstacle=mat([[path_map.current_position[0,0],path_map.current_position[0,1]+1]])
+            new_obstacle=vstack((new_obstacle,temp_obstacle))
+        if down_detect_flag:
+            temp_obstacle=mat([[path_map.current_position[0,0],path_map.current_position[0,1]-1]])
+            new_obstacle=vstack((new_obstacle,temp_obstacle))
+        # remove first all-zero row 
+        new_obstacle=delete(new_obstacle,0,axis=0)
+        # print(new_obstacle)
+
+    return new_obstacle
 
 if __name__ == '__main__':
-    start_point=mat([[1,1]])
-    end_point=mat([[4,4]])
-    num=5
-    obstacle=mat([[0,0],
-                  [1,0],
-                  [2,0],
-                  [3,0]])
-    print("Unit Test - GetObstacle: \n", GetObstacle(num,obstacle,start_point,end_point,5))
+    from PATHPLANNING import pathplanning
+    map_size=5
+    start_position=mat([[1,1]])
+    end_position=mat([[4,4]])
+    path_map=pathplanning(start_position,end_position,map_size)
+    path_map.current_position=path_map.start_position
+    path_map.start_position=mat([[1,1]])
+    path_map.end_position=mat([[4,4]])
+    path_map.obstacle=mat([[0,0],
+                           [1,0],
+                           [2,0],
+                           [3,0],
+                           [1,2],
+                           [2,1],
+                           [0,1]])
+    path_map.num_of_obstacle=5
+    print("Unit Test - GetObstacle: \n", GetObstacle(path_map,mode='detect'))
