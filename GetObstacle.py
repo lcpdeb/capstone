@@ -25,10 +25,8 @@ def GetObstacle(path_map,mode):
     if mode=='random':
         # generate Obstacles
         new_obstacle_cordinate=mat(random.randint(1,path_map.map_size+1,size=[path_map.map_size*path_map.map_size,2]))
-        # print("obstacles are :\n", ob_cordinate)
         # pick #num_of_obstacle of obstacles generated
         new_obstacle=new_obstacle_cordinate[0:path_map.num_of_obstacle,:]
-        # print("obstacles are :\n", ob)
         # remove Starting Point and Goal
         removed_list=[]
         for index in range(0,len(new_obstacle[:,0])):
@@ -40,15 +38,12 @@ def GetObstacle(path_map,mode):
     elif mode=='detect':
         new_obstacle=mat([[0,0]])
         print("Ultrasonic is detecting...")
-        # ultrasonic not created yet
-        left_detect_flag,right_detect_flag,up_detect_flag,down_detect_flag=Ultrasonic(path_map)
-        # print(left_detect_flag,right_detect_flag,up_detect_flag,down_detect_flag)
         
-        # left_detect_flag=random_pick([0,1],[0.6,0.4])
-        # right_detect_flag=random_pick([0,1],[0.65,0.35])
-        # up_detect_flag=random_pick([0,1],[0.65,0.35])
-        # down_detect_flag=random_pick([0,1],[0.6,0.4])
+        # ultrasonic not created yet
 
+        left_detect_flag,right_detect_flag,up_detect_flag,down_detect_flag=Ultrasonic(path_map)
+
+        # simulation
         if left_detect_flag:
             temp_obstacle=mat([[path_map.current_position[0,0]-1,path_map.current_position[0,1]]])
             new_obstacle=vstack((new_obstacle,temp_obstacle))
@@ -61,6 +56,29 @@ def GetObstacle(path_map,mode):
         if down_detect_flag:
             temp_obstacle=mat([[path_map.current_position[0,0],path_map.current_position[0,1]-1]])
             new_obstacle=vstack((new_obstacle,temp_obstacle))
+
+        # # real situation
+        # ultrasonic_detect_vector=mat(([left_detect_flag],
+        #                               [right_detect_flag],
+        #                               [up_detect_flag],
+        #                               [down_detect_flag]))
+
+        # obstacle_in_map=path_map.trasnmit_matrix*ultrasonic_detect_vector
+        
+        # if obstacle_in_map[0,0]:
+        #     temp_obstacle=mat([[path_map.current_position[0,0]-1,path_map.current_position[0,1]]])
+        #     new_obstacle=vstack((new_obstacle,temp_obstacle))
+        # if obstacle_in_map[1,0]:
+        #     temp_obstacle=mat([[path_map.current_position[0,0]+1,path_map.current_position[0,1]]])
+        #     new_obstacle=vstack((new_obstacle,temp_obstacle))
+        # if obstacle_in_map[2,0]:
+        #     temp_obstacle=mat([[path_map.current_position[0,0],path_map.current_position[0,1]+1]])
+        #     new_obstacle=vstack((new_obstacle,temp_obstacle))
+        # if obstacle_in_map[3,0]:
+        #     temp_obstacle=mat([[path_map.current_position[0,0],path_map.current_position[0,1]-1]])
+        #     new_obstacle=vstack((new_obstacle,temp_obstacle))
+
+
         # remove first all-zero row 
         new_obstacle=delete(new_obstacle,0,axis=0)
         # print(new_obstacle)

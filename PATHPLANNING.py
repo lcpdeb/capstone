@@ -16,7 +16,7 @@ class pathplanning:
         self.start_position=start_position
         self.end_position=end_position
         self.map_size=map_size
-        self.num_of_obstacle=75
+        self.num_of_obstacle=3*self.map_size
  
         # generate map boundary, detected
         self.detected_obstacle=GetBoundary(self.map_size)
@@ -69,13 +69,11 @@ class pathplanning:
                     detected_obstacle=Rectangle((i+0.05, j+0.05), width=0.9, height=0.9, edgecolor='white', facecolor='gray')
                     self.plot.add_patch(detected_obstacle)
         # legend
-        plt.text(self.map_size+2.5, self.map_size, "Previous", size=10, va="center",bbox=dict(boxstyle="square",edgecolor='blue', facecolor='blue'))
-        plt.text(self.map_size+2.5, self.map_size-1.5, "Path", size=10,  va="center",bbox=dict(boxstyle="square",edgecolor='green', facecolor='green'))
-        plt.text(self.map_size+2.5, self.map_size-3, "Undetected", size=10, va="center",bbox=dict(boxstyle="round",edgecolor='gray', facecolor=(0.88,0.88,0.88)))
-        plt.text(self.map_size+2.5, self.map_size-4.5, "Detected", size=10,  va="center",bbox=dict(boxstyle="round",edgecolor='white', facecolor='gray'))
+        plt.text(self.map_size+2.5, self.map_size-1.5, "Previous", size=10, va="center",bbox=dict(boxstyle="square",edgecolor='blue', facecolor='blue'))
+        plt.text(self.map_size+2.5, self.map_size-3.0, "Path", size=10,  va="center",bbox=dict(boxstyle="square",edgecolor='green', facecolor='green'))
+        plt.text(self.map_size+2.5, self.map_size-4.5, "Undetected", size=10, va="center",bbox=dict(boxstyle="round",edgecolor='gray', facecolor=(0.88,0.88,0.88)))
+        plt.text(self.map_size+2.5, self.map_size-6.0, "Detected", size=10,  va="center",bbox=dict(boxstyle="round",edgecolor='white', facecolor='gray'))
         
-
-
         # draw the PREVIOUS POINT
         for i in range(len(self.previous_position)):
             previous_position_plot = Rectangle((self.previous_position[i,0]+0.25,self.previous_position[i,1]+0.25), 
@@ -86,13 +84,18 @@ class pathplanning:
         start_position_plot = Rectangle((self.start_position[0,0]+0.05,self.start_position[0,1]+0.05), 
                                             width = 0.9, height = 0.9, edgecolor='black', facecolor='blue')
         self.plot.add_patch(start_position_plot)
-        plt.text(self.start_position[0,0], self.start_position[0,1]+0.15, "START", ha='center', va='bottom', fontsize=10.5)
+        plt.text(self.start_position[0,0]-1.3, self.start_position[0,1]+0.13, "START", ha='center', va='bottom', fontsize=10.5)
+
+        # draw the direction arrow 
+        plt.arrow(self.start_position[0,0]+0.5, self.start_position[0,1]+0.5, 
+                    0.01*self.last_direction[0,0], 0.01*self.last_direction[0,1], 
+                    head_length=0.5, head_width=0.5, edgecolor='black', facecolor='white')
         
         # draw the GOAL POINT
         end_position_plot = Rectangle((self.end_position[0,0]+0.05,self.end_position[0,1]+0.05), 
                                             width = 0.9, height = 0.9, edgecolor='black', facecolor='r')
         self.plot.add_patch(end_position_plot)
-        plt.text(self.end_position[0,0], self.end_position[0,1]+0.15, "GOAL", ha='center', va='bottom', fontsize=10.5)
+        plt.text(self.end_position[0,0]+2.2, self.end_position[0,1]+0.13, "GOAL", ha='center', va='bottom', fontsize=10.5)
         
         # set the axis of plot equally
         self.plot.axis('equal') 
@@ -107,29 +110,31 @@ class pathplanning:
             self.plot.add_patch(path_plot)
             # print("Current Position is: ({},{})".format(self.path[p,0],self.path[p,1]))
             plt.draw()
-        plt.pause(0.01)
+        plt.pause(0.1)
         plt.cla()
         plt.ioff()
 
 
 
 if __name__ == '__main__':
-    map_size=15
+    map_size=20
     start_position=mat([[1,1]])
     end_position=mat([[map_size,map_size]])
     print("Unit Test - PATHPLANNING:")
- 
-    # generate BOUNDARY first
+     # generate BOUNDARY first
     capstone=pathplanning(start_position,end_position,map_size)
     capstone.current_position=capstone.start_position
-
     # LOOP:
     # print(not isSamePosition(capstone.current_position,capstone.end_position))
     break_flag=0
     capstone.previous_position=capstone.current_position
+    capstone.last_direction=mat([[0,1]])
+    capstone.trasnmit_matrix=mat([[1,0,0,0],
+                                  [0,1,0,0],
+                                  [0,0,1,0],
+                                  [0,0,0,1]])
     while (not isSamePosition(capstone.current_position,capstone.end_position)):
-        # Detect whether OBSTACLE surrounded
-
+        # detect whether OBSTACLE surrounded
         # get detected OBSTACLE
         detected_obstacle=GetObstacle(capstone,mode='detect')
 
@@ -146,20 +151,23 @@ if __name__ == '__main__':
         capstone.UpdateObstacle(detected_obstacle)
         # generate OPTIMAL PATH
         break_flag=capstone.UpdateOptimalPath()
-        # if no path can reach GOAL
-        
+        # if no path can reach GOAL, break
         if break_flag:
             break
         else:
             # plot map
-            print("Ploting...")
+            # print("Ploting...")
             capstone.MapPlot()
             plt.draw()
             # plot OPTIMAL PATH
             capstone.PathPlot()
             # MOVE ONE STEP
             capstone.next_position=capstone.path[1,:]
-            capstone.previous_position=vstack((Move(capstone.current_position,capstone.next_position),capstone.previous_position))
+            capstone.current_position, capstone.trasnmit_matrix, capstone.last_direction=Move(capstone.last_direction, capstone.current_position,capstone.next_position)
+            print("Moving...")
+            # time.sleep(5)
+            capstone.previous_position=vstack((capstone.current_position,capstone.previous_position))
+            # prepare for next LOOP
             capstone.current_position=capstone.next_position
             capstone.start_position=capstone.current_position
     # LOOP END
