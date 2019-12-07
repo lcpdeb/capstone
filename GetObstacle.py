@@ -41,65 +41,71 @@ def GetObstacle(path_map,mode):
         
         # ultrasonic not created yet
 
-        left_detect_flag,right_detect_flag,up_detect_flag,down_detect_flag=Ultrasonic(path_map)
+        left_detect_flag,right_detect_flag,front_detect_flag,back_detect_flag=Ultrasonic(path_map)
 
-        # simulation
-        if left_detect_flag:
+#        # simulation
+#        if left_detect_flag:
+#            temp_obstacle=mat([[path_map.current_position[0,0]-1,path_map.current_position[0,1]]])
+#            new_obstacle=vstack((new_obstacle,temp_obstacle))
+#        if right_detect_flag:
+#            temp_obstacle=mat([[path_map.current_position[0,0]+1,path_map.current_position[0,1]]])
+#            new_obstacle=vstack((new_obstacle,temp_obstacle))
+#        if up_detect_flag:
+#            temp_obstacle=mat([[path_map.current_position[0,0],path_map.current_position[0,1]+1]])
+#            new_obstacle=vstack((new_obstacle,temp_obstacle))
+#        if down_detect_flag:
+#            temp_obstacle=mat([[path_map.current_position[0,0],path_map.current_position[0,1]-1]])
+#            new_obstacle=vstack((new_obstacle,temp_obstacle))
+
+        # real situation
+        ultrasonic_detect_vector=mat(([left_detect_flag],
+                                      [right_detect_flag],
+                                      [front_detect_flag],
+                                      [back_detect_flag]))
+
+        obstacle_in_map=path_map.trasnmit_matrix*ultrasonic_detect_vector
+        
+        if obstacle_in_map[0,0]:
             temp_obstacle=mat([[path_map.current_position[0,0]-1,path_map.current_position[0,1]]])
             new_obstacle=vstack((new_obstacle,temp_obstacle))
-        if right_detect_flag:
+        if obstacle_in_map[1,0]:
             temp_obstacle=mat([[path_map.current_position[0,0]+1,path_map.current_position[0,1]]])
             new_obstacle=vstack((new_obstacle,temp_obstacle))
-        if up_detect_flag:
+        if obstacle_in_map[2,0]:
             temp_obstacle=mat([[path_map.current_position[0,0],path_map.current_position[0,1]+1]])
             new_obstacle=vstack((new_obstacle,temp_obstacle))
-        if down_detect_flag:
+        if obstacle_in_map[3,0]:
             temp_obstacle=mat([[path_map.current_position[0,0],path_map.current_position[0,1]-1]])
             new_obstacle=vstack((new_obstacle,temp_obstacle))
-
-        # # real situation
-        # ultrasonic_detect_vector=mat(([left_detect_flag],
-        #                               [right_detect_flag],
-        #                               [up_detect_flag],
-        #                               [down_detect_flag]))
-
-        # obstacle_in_map=path_map.trasnmit_matrix*ultrasonic_detect_vector
-        
-        # if obstacle_in_map[0,0]:
-        #     temp_obstacle=mat([[path_map.current_position[0,0]-1,path_map.current_position[0,1]]])
-        #     new_obstacle=vstack((new_obstacle,temp_obstacle))
-        # if obstacle_in_map[1,0]:
-        #     temp_obstacle=mat([[path_map.current_position[0,0]+1,path_map.current_position[0,1]]])
-        #     new_obstacle=vstack((new_obstacle,temp_obstacle))
-        # if obstacle_in_map[2,0]:
-        #     temp_obstacle=mat([[path_map.current_position[0,0],path_map.current_position[0,1]+1]])
-        #     new_obstacle=vstack((new_obstacle,temp_obstacle))
-        # if obstacle_in_map[3,0]:
-        #     temp_obstacle=mat([[path_map.current_position[0,0],path_map.current_position[0,1]-1]])
-        #     new_obstacle=vstack((new_obstacle,temp_obstacle))
 
 
         # remove first all-zero row 
         new_obstacle=delete(new_obstacle,0,axis=0)
-        # print(new_obstacle)
+#        print(new_obstacle)
 
     return new_obstacle
 
 if __name__ == '__main__':
     from PATHPLANNING import pathplanning
     map_size=5
-    start_position=mat([[1,1]])
+    start_position=mat([[2,2]])
     end_position=mat([[4,4]])
     path_map=pathplanning(start_position,end_position,map_size)
+    
+#    path_map.start_position=mat([[2,2]])
+#    path_map.end_position=mat([[4,4]])
     path_map.current_position=path_map.start_position
-    path_map.start_position=mat([[1,1]])
-    path_map.end_position=mat([[4,4]])
-    path_map.obstacle=mat([[0,0],
-                           [1,0],
-                           [2,0],
-                           [3,0],
-                           [1,2],
-                           [2,1],
-                           [0,1]])
-    path_map.num_of_obstacle=5
+    path_map.last_direction=mat([[0,-1]])
+    path_map.trasnmit_matrix=mat([[0,1,0,0],
+                                  [1,0,0,0],
+                                  [0,0,0,1],
+                                  [0,0,1,0]])
+#    path_map.obstacle=mat([[0,0],
+#                           [1,0],
+#                           [2,0],
+#                           [3,0],
+#                           [1,2],
+#                           [2,1],
+#                           [0,1]])
+#    path_map.num_of_obstacle=5
     print("Unit Test - GetObstacle: \n", GetObstacle(path_map,mode='detect'))

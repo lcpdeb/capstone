@@ -23,10 +23,11 @@ class pathplanning:
 
         # simulation
         # generate random OBSTACLE, undetected
-        self.obstacle=GetObstacle(self,mode='random')
+        # self.obstacle=GetObstacle(self,mode='random')
         # self.obstacle=vstack((self.obstacle,random_obstacle))
         # print("first undetected obstacle",self.obstacle)
         # print("first detected obstacle",self.detected_obstacle)
+        self.obstacle=mat([[0,0]])
         # initialize the map plot
         self.plot=plt.gca()
         self.plot.set_xlim([0,self.map_size])
@@ -117,9 +118,9 @@ class pathplanning:
 
 
 if __name__ == '__main__':
-    map_size=20
-    start_position=mat([[1,1]])
-    end_position=mat([[map_size,map_size]])
+    map_size=7
+    start_position=mat([[2,2]])
+    end_position=mat([[map_size-1,map_size-1]])
     print("Unit Test - PATHPLANNING:")
      # generate BOUNDARY first
     capstone=pathplanning(start_position,end_position,map_size)
